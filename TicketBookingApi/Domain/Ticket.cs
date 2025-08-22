@@ -18,6 +18,6 @@ namespace TicketBookingApi.Domain
         public int SeatNumber { get; set; }
 
         [Required]
-        public DateTime PurchaseDate { get; set; }
+        public DateTime PurchaseDate { get; set; } = DateTime.Now;
     }
 }
