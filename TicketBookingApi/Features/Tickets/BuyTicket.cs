@@ -33,10 +33,8 @@ namespace TicketBookingApi.Features.Tickets
 
             _context.Tickets.Add(ticket);
             await _context.SaveChangesAsync(ct);
-
-            return new TicketDto(ticket.Id, trip.From, trip.To, ticket.SeatNumber);
+            var s = new TicketDto();
+            return new TicketDto { Id = ticket.Id, From = trip.From, To = trip.To, SeatNumber = ticket.SeatNumber };
         }
     }
-
-    public record TicketDto(Guid Id, string From, string To, int SeatNumber);
 }

@@ -13,10 +13,15 @@ namespace TicketBookingApi.Controllers
         public TripsController(IMediator mediator) => _mediator = mediator;
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string? from, [FromQuery] string? to, [FromQuery] DateTime? date)
+        public async Task<ActionResult<List<TripDto>>> Get(string? from, string? to, DateTime? date)
         {
             var result = await _mediator.Send(new GetTripsQuery(from, to, date));
-            return Ok(result);
+            return result;
         }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<TripDto>> Get(int id) =>
+            await _mediator.Send(new GetTripQuery(id));
+
     }
 }
