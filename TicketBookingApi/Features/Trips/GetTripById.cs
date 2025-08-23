@@ -18,7 +18,7 @@ namespace TicketBookingApi.Features.Trips
 
         public async Task<TripDto> Handle(GetTripQuery request, CancellationToken ct)
         {
-            var trip = await _context.Trips.FindAsync(request.id);
+            var trip = await _context.Trips.FindAsync(request.id, ct);
             return _mapper.Map<TripDto>(trip);
         }
     }

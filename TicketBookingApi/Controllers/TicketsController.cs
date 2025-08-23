@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TicketBookingApi.Features.Tickets;
 
@@ -15,5 +16,10 @@ namespace TicketBookingApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Buy([FromBody] BuyTicketCommand command)
             => Ok(await _mediator.Send(command));
+
+        [HttpGet("user/{id}")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult<List<TicketDto>>> GetByUserId(Guid id)
+            => await _mediator.Send(new GetTicketsByUserIdQuery(id));
     }
 }
