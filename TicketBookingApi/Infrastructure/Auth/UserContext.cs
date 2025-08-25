@@ -1,6 +1,7 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace TicketBookingApi.Features.Auth
+namespace TicketBookingApi.Infrastructure.Auth
 {
     public class UserContext : IUserContext
     {
@@ -10,12 +11,11 @@ namespace TicketBookingApi.Features.Auth
         {
             _httpContextAccessor = httpContextAccessor;
         }
+
         public Guid? UserId
-            => Guid.TryParse(_httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier), out var id)
+            => Guid.TryParse(_httpContextAccessor.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out var id)
                 ? id
                 : null;
-
-        public string? Email => _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Email);
 
         public string? Role => _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Role);
 

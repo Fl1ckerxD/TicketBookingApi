@@ -1,5 +1,8 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using TicketBookingApi.Features.Auth;
+using Microsoft.IdentityModel.Tokens;
+using TicketBookingApi.Infrastructure.Auth;
 using TicketBookingApi.Infrastructure.Persistence;
 namespace TicketBookingApi;
 
@@ -21,6 +24,33 @@ public class Program
         builder.Services.AddAutoMapper(cfg => { }, typeof(Program));
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<IUserContext, UserContext>();
+        builder.Services.AddScoped<JwtService>();
+
+        // JWT config
+        var jwtConfig = builder.Configuration.GetSection("Jwt");
+        var key = Encoding.UTF8.GetBytes(jwtConfig["Key"]);
+
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtConfig["Issuer"],
+
+                    ValidateAudience = true,
+                    ValidAudience = jwtConfig["Audience"],
+
+                    ValidateLifetime = true,
+                    RequireExpirationTime = true,
+                    ClockSkew = TimeSpan.Zero,
+
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key)
+                };
+            });
+
+        builder.Services.AddAuthorization();
 
         var app = builder.Build();
 
@@ -51,6 +81,7 @@ public class Program
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();

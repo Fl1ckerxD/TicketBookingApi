@@ -1,6 +1,6 @@
 using MediatR;
 using TicketBookingApi.Domain;
-using TicketBookingApi.Features.Auth;
+using TicketBookingApi.Infrastructure.Auth;
 using TicketBookingApi.Infrastructure.Persistence;
 
 namespace TicketBookingApi.Features.Tickets

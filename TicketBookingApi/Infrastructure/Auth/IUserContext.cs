@@ -1,9 +1,8 @@
-namespace TicketBookingApi.Features.Auth
+namespace TicketBookingApi.Infrastructure.Auth
 {
     public interface IUserContext
     {
         Guid? UserId { get; }
-        string? Email { get; }
         string? Role { get; }
         bool IsAuthenticated { get; }
     }
