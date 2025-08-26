@@ -1,7 +1,10 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using TicketBookingApi.Domain;
+using TicketBookingApi.Domain.Interfaces;
 using TicketBookingApi.Infrastructure.Auth;
 using TicketBookingApi.Infrastructure.Persistence;
 namespace TicketBookingApi;
@@ -19,18 +22,35 @@ public class Program
         // Add services to the container.
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
+
         builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(conString));
+        builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
+        {
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequireLowercase = false;
+            options.Password.RequireUppercase = false;
+            options.Password.RequireDigit = false;
+        })
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders()
+            .AddRoles<IdentityRole<Guid>>();
+
         builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
         builder.Services.AddAutoMapper(cfg => { }, typeof(Program));
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<IUserContext, UserContext>();
-        builder.Services.AddScoped<JwtService>();
+        builder.Services.AddScoped<IJwtService, JwtService>();
+        builder.Services.AddScoped<IAuthService, AuthService>();
 
         // JWT config
         var jwtConfig = builder.Configuration.GetSection("Jwt");
         var key = Encoding.UTF8.GetBytes(jwtConfig["Key"]);
 
-        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -60,7 +80,9 @@ public class Program
             try
             {
                 var context = services.GetRequiredService<AppDbContext>();
-                await SeedData.SeedAsync(context, app.Logger);
+                var userManager = services.GetRequiredService<UserManager<User>>();
+                var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+                await SeedData.SeedAsync(context, userManager, roleManager, app.Logger);
             }
             catch (Exception ex)
             {

@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TicketBookingApi.Domain;
 
@@ -9,7 +6,7 @@ namespace TicketBookingApi.Infrastructure.Persistence
 {
     public class SeedData
     {
-        public static async Task SeedAsync(AppDbContext context, ILogger logger, int retry = 0)
+        public static async Task SeedAsync(AppDbContext context, UserManager<User> userManager, RoleManager<IdentityRole<Guid>> roleManager, ILogger logger, int retry = 0)
         {
             var retryForAvailability = retry;
             try
@@ -17,15 +14,39 @@ namespace TicketBookingApi.Infrastructure.Persistence
                 if (context.Database.IsSqlServer())
                     context.Database.Migrate();
 
+                if (!await context.Roles.AnyAsync())
+                {
+                    await roleManager.CreateAsync(new IdentityRole<Guid> { Name = "User" });
+                    await roleManager.CreateAsync(new IdentityRole<Guid> { Name = "Admin" });
+                }
+
                 if (!await context.Users.AnyAsync())
                 {
-                    var users = new List<User>
+
+                    var admin = new User
                     {
-                        new User { Name = "Иван", LastName = "Иванов", Patronymic = "Иванович", Email = "ivanov@mail.ru", PhoneNumber = "+79991234567", PasswordHash = "hash1", Role = "User" },
-                        new User { Name = "Мария", LastName = "Петрова", Patronymic = "Сергеевна", Email = "petrova@mail.ru", PhoneNumber = "+79991234568", PasswordHash = "hash2", Role = "Admin" }
+                        UserName = "log1",
+                        Name = "Иван",
+                        LastName = "Иванов",
+                        Patronymic = "Иванович",
+                        Email = "ivanov@mail.ru",
+                        PhoneNumber = "+79991234567"
                     };
-                    context.Users.AddRange(users);
-                    await context.SaveChangesAsync();
+                    var user = new User
+                    {
+                        UserName = "log2",
+                        Name = "Мария",
+                        LastName = "Петрова",
+                        Patronymic = "Сергеевна",
+                        Email = "petrova@mail.ru",
+                        PhoneNumber = "+79991234568"
+                    };
+
+                    await userManager.CreateAsync(admin, "admin123");
+                    await userManager.CreateAsync(user, "user123");
+
+                    await userManager.AddToRoleAsync(admin, "Admin");
+                    await userManager.AddToRoleAsync(user, "User");
                 }
 
                 if (!await context.Trips.AnyAsync())
@@ -41,12 +62,15 @@ namespace TicketBookingApi.Infrastructure.Persistence
 
                 if (!await context.Tickets.AnyAsync())
                 {
-                    var users = context.Users.ToArray();
+                    var users = context.Users.Take(2).ToArray();
+                    var trips = context.Trips.Take(2).ToArray();
+
                     var tickets = new List<Ticket>
                     {
-                        new Ticket { UserId = users[0].Id, TripId = 1, SeatNumber = 1 },
-                        new Ticket { UserId = users[1].Id, TripId = 2, SeatNumber = 2 }
+                        new Ticket { TripId = trips[0].Id, UserId = users[0].Id, SeatNumber = 1 },
+                        new Ticket { TripId = trips[1].Id, UserId = users[0].Id, SeatNumber = 2 }
                     };
+                    
                     context.Tickets.AddRange(tickets);
                     await context.SaveChangesAsync();
                 }
@@ -58,7 +82,7 @@ namespace TicketBookingApi.Infrastructure.Persistence
                 retryForAvailability++;
 
                 logger.LogError(ex.Message);
-                await SeedAsync(context, logger, retryForAvailability);
+                await SeedAsync(context, userManager, roleManager, logger, retryForAvailability);
                 throw;
             }
         }

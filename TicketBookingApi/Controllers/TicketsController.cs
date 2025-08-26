@@ -18,7 +18,7 @@ namespace TicketBookingApi.Controllers
             => Ok(await _mediator.Send(command));
 
         [HttpGet("user/{id}")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<List<TicketDto>>> GetByUserId(Guid id)
             => await _mediator.Send(new GetTicketsByUserIdQuery(id));
     }

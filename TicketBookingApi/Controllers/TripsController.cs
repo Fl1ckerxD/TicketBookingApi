@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TicketBookingApi.Features.Trips;
 
@@ -6,6 +7,7 @@ namespace TicketBookingApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class TripsController : ControllerBase
     {
         private readonly IMediator _mediator;

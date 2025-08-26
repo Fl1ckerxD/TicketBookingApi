@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace TicketBookingApi.Domain
 {
-    public class User
+    public class User : IdentityUser<Guid>
     {
-
-        public Guid Id { get; set; } = Guid.NewGuid();
+        [Required]
+        [MaxLength(25)]
+        public override string UserName { get; set; } = null!;
 
         [MaxLength(30)]
         public string LastName { get; set; } = null!;
@@ -15,21 +17,6 @@ namespace TicketBookingApi.Domain
 
         [MaxLength(35)]
         public string? Patronymic { get; set; }
-
-        [EmailAddress]
-        [MaxLength(100)]
-        public string? Email { get; set; }
-
-        [Phone]
-        [MaxLength(12)]
-        public string? PhoneNumber { get; set; }
-
-        [MaxLength(200)]
-        public string PasswordHash { get; set; } = null!;
-
-        [Required]
-        [MaxLength(20)]
-        public string Role { get; set; } = "User";
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<Ticket> Tickets { get; set; } = new HashSet<Ticket>();
