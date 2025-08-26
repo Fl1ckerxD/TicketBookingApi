@@ -2,9 +2,8 @@ using AutoMapper;
 using MediatR;
 using TicketBookingApi.Infrastructure.Persistence;
 
-namespace TicketBookingApi.Features.Trips
+namespace TicketBookingApi.Features.Trips.GetTripById
 {
-    public record GetTripQuery(int id) : IRequest<TripDto>;
     public class GetTripHandler : IRequestHandler<GetTripQuery, TripDto>
     {
         private readonly AppDbContext _context;

@@ -2,6 +2,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TicketBookingApi.Features.Trips;
+using TicketBookingApi.Features.Trips.GetTripById;
+using TicketBookingApi.Features.Trips.GetTrips;
 
 namespace TicketBookingApi.Controllers
 {

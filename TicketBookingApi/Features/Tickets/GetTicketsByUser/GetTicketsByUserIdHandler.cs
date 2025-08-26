@@ -3,9 +3,8 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using TicketBookingApi.Infrastructure.Persistence;
 
-namespace TicketBookingApi.Features.Tickets
+namespace TicketBookingApi.Features.Tickets.GetTicketsByUser
 {
-    public record GetTicketsByUserIdQuery(Guid Id) : IRequest<List<TicketDto>>;
     public class GetTicketsByUserIdHandler : IRequestHandler<GetTicketsByUserIdQuery, List<TicketDto>>
     {
         private readonly AppDbContext _context;

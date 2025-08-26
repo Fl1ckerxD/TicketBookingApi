@@ -1,6 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TicketBookingApi.Features.Auth;
+using TicketBookingApi.Features.Auth.Login;
 
 namespace TicketBookingApi.Controllers
 {

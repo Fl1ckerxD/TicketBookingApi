@@ -3,9 +3,8 @@ using TicketBookingApi.Domain;
 using TicketBookingApi.Infrastructure.Auth;
 using TicketBookingApi.Infrastructure.Persistence;
 
-namespace TicketBookingApi.Features.Tickets
+namespace TicketBookingApi.Features.Tickets.BuyTicket
 {
-    public record BuyTicketCommand(int TripId, int SeatNumber) : IRequest<TicketDto>;
     public class BuyTicketHandler : IRequestHandler<BuyTicketCommand, TicketDto>
     {
         private readonly AppDbContext _context;

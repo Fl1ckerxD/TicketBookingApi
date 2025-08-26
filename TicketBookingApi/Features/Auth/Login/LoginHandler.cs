@@ -1,12 +1,8 @@
-using System.Diagnostics;
 using MediatR;
 using TicketBookingApi.Domain.Interfaces;
-using TicketBookingApi.Infrastructure.Auth;
 
-namespace TicketBookingApi.Features.Auth
+namespace TicketBookingApi.Features.Auth.Login
 {
-    public record LoginCommand(string Username, string Password) : IRequest<string>;
-
     public class LoginHandler : IRequestHandler<LoginCommand, string>
     {
         private readonly IAuthService _authService;
