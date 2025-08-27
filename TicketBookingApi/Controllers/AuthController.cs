@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TicketBookingApi.Features.Auth.Login;
+using TicketBookingApi.Features.Auth.Register;
 
 namespace TicketBookingApi.Controllers
 {
@@ -26,6 +27,24 @@ namespace TicketBookingApi.Controllers
             catch (UnauthorizedAccessException)
             {
                 return Unauthorized();
+            }
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterCommand command)
+        {
+            try
+            {
+                await _mediator.Send(command);
+                return Ok();
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
         }
     }
