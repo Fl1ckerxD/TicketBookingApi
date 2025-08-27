@@ -3,6 +3,7 @@ using TicketBookingApi.Domain;
 using TicketBookingApi.Features.Auth.Register;
 using TicketBookingApi.Features.Tickets;
 using TicketBookingApi.Features.Trips;
+using TicketBookingApi.Features.Users;
 
 namespace TicketBookingApi.Common.MappingPoriles
 {
@@ -17,8 +18,11 @@ namespace TicketBookingApi.Common.MappingPoriles
                 .ForMember(dest => dest.To, opt => opt.MapFrom(src => src.Trip.To));
 
             CreateMap<RegisterCommand, RegisterDto>();
-            
+
             CreateMap<RegisterDto, User>();
+
+            CreateMap<User, UserDto>()
+                .ForMember(dest => dest.Roles, opt => opt.Ignore());
         }
     }
 }
