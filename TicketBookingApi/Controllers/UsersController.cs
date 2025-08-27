@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TicketBookingApi.Features.Users;
+using TicketBookingApi.Features.Users.DeleteUser;
 using TicketBookingApi.Features.Users.GetUserByName;
 using TicketBookingApi.Features.Users.GetUsers;
 
@@ -29,6 +30,24 @@ namespace TicketBookingApi.Controllers
             try
             {
                 return await _mediator.Send(new GetUserByNameQuery(userName));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("{userName}")]
+        public async Task<IActionResult> DeleteUser(string userName)
+        {
+            try
+            {
+                await _mediator.Send(new DeleteUserCommand(userName));
+                return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
