@@ -7,6 +7,7 @@ namespace TicketBookingApi.Features.Trips
         public string To { get; set; } = null!;
         public DateTime DepartureTime { get; set; }
         public DateTime ArrivalTime { get; set; }
+        public int TotalSeats { get; set; }
         public decimal Price { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TicketBookingApi.Features.Trips;
 using TicketBookingApi.Features.Trips.CreateTrip;
+using TicketBookingApi.Features.Trips.DeleteTrip;
 using TicketBookingApi.Features.Trips.GetTripById;
 using TicketBookingApi.Features.Trips.GetTrips;
 using TicketBookingApi.Features.Trips.UpdateTrip;
@@ -43,6 +44,21 @@ namespace TicketBookingApi.Controllers
 
             var tripDto = await _mediator.Send(command);
             return Ok(tripDto);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                await _mediator.Send(new DeleteTripCommand(id));
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }
