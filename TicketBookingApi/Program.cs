@@ -1,8 +1,11 @@
 using System.Text;
+using FluentValidation.AspNetCore;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using TicketBookingApi.Common.Validations;
 using TicketBookingApi.Domain;
 using TicketBookingApi.Domain.Interfaces;
 using TicketBookingApi.Infrastructure.Auth;
@@ -20,7 +23,8 @@ public class Program
             throw new InvalidOperationException($"Connection string '{CONNECTION_STRING}' not found.");
 
         // Add services to the container.
-        builder.Services.AddControllers();
+        builder.Services.AddControllers()
+            .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>());
         builder.Services.AddOpenApi();
 
         builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(conString));
@@ -41,6 +45,7 @@ public class Program
         builder.Services.AddScoped<IUserContext, UserContext>();
         builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddScoped<IAuthService, AuthService>();
+        builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
         // JWT config
         var jwtConfig = builder.Configuration.GetSection("Jwt");
