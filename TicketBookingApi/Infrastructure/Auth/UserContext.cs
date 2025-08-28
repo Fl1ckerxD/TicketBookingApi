@@ -13,7 +13,7 @@ namespace TicketBookingApi.Infrastructure.Auth
         }
 
         public Guid? UserId
-            => Guid.TryParse(_httpContextAccessor.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out var id)
+            => Guid.TryParse(_httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier), out var id)
                 ? id
                 : null;
 

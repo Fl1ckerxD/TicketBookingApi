@@ -3,12 +3,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TicketBookingApi.Features.Tickets;
 using TicketBookingApi.Features.Tickets.BuyTicket;
+using TicketBookingApi.Features.Tickets.GetMyTickets;
 using TicketBookingApi.Features.Tickets.GetTicketsByUser;
 
 namespace TicketBookingApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class TicketsController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -30,6 +32,20 @@ namespace TicketBookingApi.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
+
+        [HttpGet("me")]
+        public async Task<ActionResult<IEnumerable<TicketDto>>> GetMyTickets()
+        {
+            try
+            {
+                var tickets = await _mediator.Send(new GetMyTicketsQuery());
+                return Ok(tickets);
             }
             catch (Exception ex)
             {
