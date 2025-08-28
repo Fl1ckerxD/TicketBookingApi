@@ -5,6 +5,7 @@ using TicketBookingApi.Features.Trips;
 using TicketBookingApi.Features.Trips.CreateTrip;
 using TicketBookingApi.Features.Trips.GetTripById;
 using TicketBookingApi.Features.Trips.GetTrips;
+using TicketBookingApi.Features.Trips.UpdateTrip;
 
 namespace TicketBookingApi.Controllers
 {
@@ -31,6 +32,17 @@ namespace TicketBookingApi.Controllers
         {
             var tripDto = await _mediator.Send(command);
             return CreatedAtAction(nameof(GetById), new { id = tripDto.Id }, tripDto);
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<TripDto>> Update(int id, [FromBody] UpdateTripCommand command)
+        {
+            if (id != command.Id)
+                return BadRequest("Идентификатор в URL не совпадает с идентификатором в теле запроса");
+
+            var tripDto = await _mediator.Send(command);
+            return Ok(tripDto);
         }
     }
 }
