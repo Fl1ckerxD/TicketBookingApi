@@ -19,8 +19,22 @@ namespace TicketBookingApi.Controllers
         public TicketsController(IMediator mediator) => _mediator = mediator;
 
         [HttpPost]
-        public async Task<IActionResult> Buy([FromBody] BuyTicketCommand command)
-            => Ok(await _mediator.Send(command));
+        public async Task<ActionResult<TicketDto>> Buy([FromBody] BuyTicketCommand command)
+        {
+            try
+            {
+                var ticket = await _mediator.Send(command);
+                return CreatedAtAction(nameof(Buy), new { id = ticket.Id }, ticket);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpGet("user/{userName}")]
         [Authorize(Roles = "Admin")]
