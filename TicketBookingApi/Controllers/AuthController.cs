@@ -1,6 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using TicketBookingApi.Features.Auth;
 using TicketBookingApi.Features.Auth.Login;
+using TicketBookingApi.Features.Auth.RefreshToken;
 using TicketBookingApi.Features.Auth.Register;
 
 namespace TicketBookingApi.Controllers
@@ -17,12 +19,12 @@ namespace TicketBookingApi.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginCommand command)
+        public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginCommand command)
         {
             try
             {
-                var token = await _mediator.Send(command);
-                return Ok(new { token });
+                var authResponse = await _mediator.Send(command);
+                return authResponse;
             }
             catch (UnauthorizedAccessException)
             {
@@ -45,6 +47,20 @@ namespace TicketBookingApi.Controllers
             catch (ArgumentException ex)
             {
                 return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<AuthResponseDto>> RefreshToken([FromBody] RefreshTokenCommand command)
+        {
+            try
+            {
+                var authResponse = await _mediator.Send(command);
+                return authResponse;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
             }
         }
     }

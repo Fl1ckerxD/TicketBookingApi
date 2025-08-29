@@ -20,5 +20,6 @@ namespace TicketBookingApi.Domain
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<Ticket> Tickets { get; set; } = new HashSet<Ticket>();
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new HashSet<RefreshToken>();
     }
 }

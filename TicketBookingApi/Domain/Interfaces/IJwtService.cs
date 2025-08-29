@@ -2,6 +2,7 @@ namespace TicketBookingApi.Domain.Interfaces
 {
     public interface IJwtService
     {
-        public string GenerateJwtToken(User user, IList<string> roles);
+        string GenerateJwtToken(User user, IList<string> roles);
+        RefreshToken GenerateRefreshToken(Guid userId);
     }
 }

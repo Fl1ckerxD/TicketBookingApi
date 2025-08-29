@@ -3,7 +3,7 @@ using TicketBookingApi.Domain.Interfaces;
 
 namespace TicketBookingApi.Features.Auth.Login
 {
-    public class LoginHandler : IRequestHandler<LoginCommand, string>
+    public class LoginHandler : IRequestHandler<LoginCommand, AuthResponseDto>
     {
         private readonly IAuthService _authService;
 
@@ -12,7 +12,7 @@ namespace TicketBookingApi.Features.Auth.Login
             _authService = authService;
         }
 
-        public async Task<string> Handle(LoginCommand request, CancellationToken cancellationToken)
+        public async Task<AuthResponseDto> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
             return await _authService.LoginAsync(request.Username, request.Password);
         }

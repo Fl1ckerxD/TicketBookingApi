@@ -2,7 +2,9 @@ using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using TicketBookingApi.Domain;
 using TicketBookingApi.Domain.Interfaces;
+using TicketBookingApi.Features.Auth;
 using TicketBookingApi.Features.Auth.Register;
+using TicketBookingApi.Infrastructure.Persistence;
 
 namespace TicketBookingApi.Infrastructure.Auth
 {
@@ -10,21 +12,23 @@ namespace TicketBookingApi.Infrastructure.Auth
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly AppDbContext _context;
         private readonly ILogger<AuthService> _logger;
         private readonly IJwtService _jwtService;
         private readonly IMapper _mapper;
 
         public AuthService(UserManager<User> userManager, IJwtService jwtService,
-            SignInManager<User> signInManager, ILogger<AuthService> logger, IMapper mapper)
+            SignInManager<User> signInManager, AppDbContext context, ILogger<AuthService> logger, IMapper mapper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _context = context;
             _logger = logger;
             _jwtService = jwtService;
             _mapper = mapper;
         }
 
-        public async Task<string> LoginAsync(string username, string password)
+        public async Task<AuthResponseDto> LoginAsync(string username, string password)
         {
             var user = await _userManager.FindByNameAsync(username);
             if (user == null)
@@ -35,7 +39,18 @@ namespace TicketBookingApi.Infrastructure.Auth
                 throw new UnauthorizedAccessException("Неверное имя пользователя или пароль");
 
             var roles = await _userManager.GetRolesAsync(user);
-            return _jwtService.GenerateJwtToken(user, roles);
+
+            var accessToken = _jwtService.GenerateJwtToken(user, roles);
+            var refreshToken = _jwtService.GenerateRefreshToken(user.Id);
+
+            await _context.RefreshTokens.AddAsync(refreshToken);
+            await _context.SaveChangesAsync();
+
+            return new AuthResponseDto
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken.Token
+            };
         }
 
         public async Task RegisterAsync(RegisterDto registerDto)
