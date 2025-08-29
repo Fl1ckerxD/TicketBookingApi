@@ -56,24 +56,30 @@ public class Program
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         })
-            .AddJwtBearer(options =>
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
             {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = jwtConfig["Issuer"],
+                ValidateIssuer = true,
+                ValidIssuer = jwtConfig["Issuer"],
 
-                    ValidateAudience = true,
-                    ValidAudience = jwtConfig["Audience"],
+                ValidateAudience = true,
+                ValidAudience = jwtConfig["Audience"],
 
-                    ValidateLifetime = true,
-                    RequireExpirationTime = true,
-                    ClockSkew = TimeSpan.Zero,
+                ValidateLifetime = true,
+                RequireExpirationTime = true,
+                ClockSkew = TimeSpan.Zero,
 
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key)
-                };
-            });
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key)
+            };
+        })
+        .AddGoogle(options =>
+        {
+            options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+            options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+            options.SignInScheme = IdentityConstants.ExternalScheme;
+        });
 
         builder.Services.AddAuthorization();
 

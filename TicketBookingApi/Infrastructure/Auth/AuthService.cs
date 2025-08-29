@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using TicketBookingApi.Domain;
@@ -26,6 +27,60 @@ namespace TicketBookingApi.Infrastructure.Auth
             _logger = logger;
             _jwtService = jwtService;
             _mapper = mapper;
+        }
+
+        public async Task<AuthResponseDto> ExternalLoginAsync(IEnumerable<Claim> claims, string provider)
+        {
+            var providerKey = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value
+            ?? throw new Exception("Внешний провайдер не вернул NameIdentifier");
+
+            var user = await _userManager.FindByLoginAsync(provider, providerKey);
+            if (user == null)
+            {
+                var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value
+                ?? throw new InvalidOperationException("Email is required for external login.");
+
+                user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                {
+                    var lastName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value;
+                    var givenName = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value;
+
+                    user = new User
+                    {
+                        UserName = email ?? Guid.NewGuid().ToString("N"),
+                        Email = email,
+                        Name = givenName,
+                        LastName = lastName ?? string.Empty,
+                    };
+
+                    var result = await _userManager.CreateAsync(user);
+                    if (!result.Succeeded)
+                        throw new Exception("Не удалось создать пользователя: " +
+                            string.Join(", ", result.Errors.Select(e => e.Description)));
+                    await _userManager.AddToRoleAsync(user, "User");
+                }
+
+                var loginInfo = new UserLoginInfo(provider, providerKey, provider);
+                var addLoginResult = await _userManager.AddLoginAsync(user, loginInfo);
+                if (!addLoginResult.Succeeded)
+                    throw new Exception("Не удалось добавить внешний логин: " +
+                        string.Join(", ", addLoginResult.Errors.Select(e => e.Description)));
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var accessToken = _jwtService.GenerateJwtToken(user, roles);
+            var refreshToken = _jwtService.GenerateRefreshToken(user.Id);
+
+            await _context.RefreshTokens.AddAsync(refreshToken);
+            await _context.SaveChangesAsync();
+
+            return new AuthResponseDto
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken.Token
+            };
         }
 
         public async Task<AuthResponseDto> LoginAsync(string username, string password)

@@ -1,6 +1,9 @@
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TicketBookingApi.Features.Auth;
+using TicketBookingApi.Features.Auth.ExternalLogin;
 using TicketBookingApi.Features.Auth.Login;
 using TicketBookingApi.Features.Auth.RefreshToken;
 using TicketBookingApi.Features.Auth.Register;
@@ -62,6 +65,27 @@ namespace TicketBookingApi.Controllers
             {
                 return Unauthorized();
             }
+        }
+
+        [HttpGet("signin/{provider}")]
+        public IActionResult SignIn(string provider, string returnUrl = "/")
+        {
+            var redirectUrl = Url.Action(nameof(Callback), "Auth", new { returnUrl, provider }, Request.Scheme);
+            var props = new AuthenticationProperties { RedirectUri = redirectUrl };
+            return Challenge(props, provider);
+        }
+
+        [HttpGet("callback")]
+        public async Task<ActionResult<AuthResponseDto>> Callback(string returnUrl = "/", string provider = "Google")
+        {
+            var result = await HttpContext.AuthenticateAsync(IdentityConstants.ExternalScheme);
+
+            if (!result.Succeeded)
+                return Unauthorized(new { error = "External login failed" });
+
+            var claims = result.Principal.Identities.First().Claims.ToList();
+
+            return await _mediator.Send(new ExternalLoginCommand(claims, provider));
         }
     }
 }
