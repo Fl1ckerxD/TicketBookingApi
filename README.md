@@ -39,7 +39,7 @@ RESTful API для системы бронирования билетов на �
 | **Backend**          | ASP.NET Core 9                 |
 | **База данных**      | MS SQL Server                  |
 | **ORM**              | EF Core (Code First) |
-| **Безопасность**     | ASP.NET Identity, JWT (Access Tokens + Refresh Tokens), OAuth 2.0 (Google)  |
+| **Безопасность**     | ASP.NET Identity, JWT (Access Tokens + Refresh Tokens), OAuth 2.0 (Google, Yandex)  |
 | **Паттерны и библиотеки**      | CQRS (MediatR), AutoMapper, FluentValidation|
 | **API Docs**      | Swagger / OpenAPI |
 
@@ -74,6 +74,11 @@ dotnet ef database update
 ``` bash
 dotnet user-secrets set "Authentication:Google:ClientId" "<CLIENT_ID>"
 dotnet user-secrets set "Authentication:Google:ClientSecret" "<CLIENT_SECRET>"
+```
+- Для Yandex OAuth:
+``` bash
+dotnet user-secrets set "Authentication:Yandex:ClientId" "<CLIENT_ID>"
+dotnet user-secrets set "Authentication:Yandex:ClientSecret" "<CLIENT_SECRET>"
 ```
 
 ### 5. Запустить приложение
@@ -127,8 +132,11 @@ Content-Type: application/json
 }
 ```
 
-#### 3. Вход через Google:
+#### 3. Вход через сторонние провайдеры:
+- Вход через Google:
 `http://localhost:5287/api/auth/signin/Google`
+- Вход через Yandex:
+`http://localhost:5287/api/auth/signin/Yandex`
 
 #### 4. Обновление токена:
 ``` http

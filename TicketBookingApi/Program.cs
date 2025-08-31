@@ -78,8 +78,14 @@ public class Program
         {
             options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
             options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-            options.SignInScheme = IdentityConstants.ExternalScheme;
+        })
+        .AddYandex(options =>
+        {
+            options.ClientId = builder.Configuration["Authentication:Yandex:ClientId"];
+            options.ClientSecret = builder.Configuration["Authentication:Yandex:ClientSecret"];
+            options.CallbackPath = "/yandex-signin";
         });
+
 
         builder.Services.AddAuthorization();
 
