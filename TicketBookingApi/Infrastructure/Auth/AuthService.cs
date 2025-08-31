@@ -38,7 +38,7 @@ namespace TicketBookingApi.Infrastructure.Auth
             if (user == null)
             {
                 var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value
-                ?? throw new InvalidOperationException("Email is required for external login.");
+                ?? throw new InvalidOperationException("Для внешнего входа требуется адрес электронной почты");
 
                 user = await _userManager.FindByEmailAsync(email);
                 if (user == null)
@@ -56,16 +56,28 @@ namespace TicketBookingApi.Infrastructure.Auth
 
                     var result = await _userManager.CreateAsync(user);
                     if (!result.Succeeded)
-                        throw new Exception("Не удалось создать пользователя: " +
-                            string.Join(", ", result.Errors.Select(e => e.Description)));
+                    {
+                        string msg = "Не удалось создать пользователя: " +
+                            string.Join(", ", result.Errors.Select(e => e.Description));
+                        _logger.LogError(msg);
+                        throw new Exception(msg);
+                    }
                     await _userManager.AddToRoleAsync(user, "User");
+
+                    _logger.LogInformation($"Пользователь {user.UserName} зарегистрировался через внешний провайдер: {provider}");
                 }
 
                 var loginInfo = new UserLoginInfo(provider, providerKey, provider);
                 var addLoginResult = await _userManager.AddLoginAsync(user, loginInfo);
                 if (!addLoginResult.Succeeded)
-                    throw new Exception("Не удалось добавить внешний логин: " +
-                        string.Join(", ", addLoginResult.Errors.Select(e => e.Description)));
+                {
+                    string msg = "Не удалось добавить внешний логин: " +
+                        string.Join(", ", addLoginResult.Errors.Select(e => e.Description));
+                    _logger.LogError(msg);
+                    throw new Exception(msg);
+                }
+                
+                _logger.LogInformation($"Добавлен внешний провайдер {provider} для пользователя {user.UserName}");
             }
 
             var roles = await _userManager.GetRolesAsync(user);
@@ -76,6 +88,8 @@ namespace TicketBookingApi.Infrastructure.Auth
             await _context.RefreshTokens.AddAsync(refreshToken);
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation($"Пользователь {user.UserName}, вошел в систему через внешний провайдер: {provider}");
+
             return new AuthResponseDto
             {
                 AccessToken = accessToken,
@@ -85,6 +99,9 @@ namespace TicketBookingApi.Infrastructure.Auth
 
         public async Task<AuthResponseDto> LoginAsync(string username, string password)
         {
+            if (!string.IsNullOrEmpty(username) || !string.IsNullOrEmpty(password))
+                throw new ArgumentNullException("Логин и пароль обязательны для ввода");
+
             var user = await _userManager.FindByNameAsync(username);
             if (user == null)
                 throw new UnauthorizedAccessException("Неверное имя пользователя или пароль");
@@ -100,6 +117,8 @@ namespace TicketBookingApi.Infrastructure.Auth
 
             await _context.RefreshTokens.AddAsync(refreshToken);
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation($"Пользователь {user.UserName}, вошел в систему");
 
             return new AuthResponseDto
             {

@@ -15,8 +15,13 @@ namespace TicketBookingApi.Controllers
     public class TicketsController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<TicketsController> _logger;
 
-        public TicketsController(IMediator mediator) => _mediator = mediator;
+        public TicketsController(IMediator mediator, ILogger<TicketsController> logger)
+        {
+            _mediator = mediator;
+            _logger = logger;
+        }
 
         [HttpPost]
         public async Task<ActionResult<TicketDto>> Buy([FromBody] BuyTicketCommand command)
@@ -32,6 +37,7 @@ namespace TicketBookingApi.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 return BadRequest(ex.Message);
             }
         }
@@ -50,6 +56,7 @@ namespace TicketBookingApi.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
             }
         }
@@ -64,6 +71,7 @@ namespace TicketBookingApi.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
             }
         }
@@ -82,6 +90,7 @@ namespace TicketBookingApi.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
             }
         }

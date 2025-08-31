@@ -15,10 +15,12 @@ namespace TicketBookingApi.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IMediator mediator)
+        public AuthController(IMediator mediator, ILogger<AuthController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         [HttpPost("login")]
@@ -32,6 +34,11 @@ namespace TicketBookingApi.Controllers
             catch (UnauthorizedAccessException)
             {
                 return Unauthorized();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
             }
         }
 
@@ -51,6 +58,11 @@ namespace TicketBookingApi.Controllers
             {
                 return BadRequest(new { error = ex.Message });
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
+            }
         }
 
         [HttpPost("refresh-token")]
@@ -65,6 +77,11 @@ namespace TicketBookingApi.Controllers
             {
                 return Unauthorized();
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
+            }
         }
 
         [HttpGet("signin/{provider}")]
@@ -78,14 +95,25 @@ namespace TicketBookingApi.Controllers
         [HttpGet("callback")]
         public async Task<ActionResult<AuthResponseDto>> Callback(string returnUrl = "/", string provider = "Google")
         {
-            var result = await HttpContext.AuthenticateAsync(IdentityConstants.ExternalScheme);
+            try
+            {
+                var result = await HttpContext.AuthenticateAsync(IdentityConstants.ExternalScheme);
 
-            if (!result.Succeeded)
-                return Unauthorized(new { error = "External login failed" });
+                if (!result.Succeeded)
+                    return Unauthorized(new { error = "External login failed" });
 
-            var claims = result.Principal.Identities.First().Claims.ToList();
-
-            return await _mediator.Send(new ExternalLoginCommand(claims, provider));
+                var claims = result.Principal.Identities.First().Claims.ToList();
+                return await _mediator.Send(new ExternalLoginCommand(claims, provider));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
+            }
         }
     }
 }

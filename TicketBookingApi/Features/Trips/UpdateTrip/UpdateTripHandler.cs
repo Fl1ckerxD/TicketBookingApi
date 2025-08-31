@@ -8,11 +8,13 @@ namespace TicketBookingApi.Features.Trips.UpdateTrip
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly ILogger<UpdateTripHandler> _logger;
 
-        public UpdateTripHandler(AppDbContext context, IMapper mapper)
+        public UpdateTripHandler(AppDbContext context, IMapper mapper, ILogger<UpdateTripHandler> logger)
         {
             _context = context;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<TripDto> Handle(UpdateTripCommand request, CancellationToken ct)
@@ -30,7 +32,7 @@ namespace TicketBookingApi.Features.Trips.UpdateTrip
             trip.Price = request.Price;
 
             await _context.SaveChangesAsync(ct);
-
+            _logger.LogInformation($"Обновлена поездка Id: {trip.Id}");
             return _mapper.Map<TripDto>(trip);
         }
     }

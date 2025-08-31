@@ -14,15 +14,27 @@ namespace TicketBookingApi.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<UsersController> _logger;
 
-        public UsersController(IMediator mediator)
+        public UsersController(IMediator mediator, ILogger<UsersController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<ActionResult<List<UserDto>>> GetUsers()
-            => await _mediator.Send(new GetUsersQuery());
+        {
+            try
+            {
+                return await _mediator.Send(new GetUsersQuery());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
 
         [HttpGet("{userName}")]
         public async Task<ActionResult<UserDto>> GetUserByName(string userName)
@@ -37,6 +49,7 @@ namespace TicketBookingApi.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
             }
         }
@@ -55,6 +68,7 @@ namespace TicketBookingApi.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
             }
         }

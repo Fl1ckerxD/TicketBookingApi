@@ -16,23 +16,56 @@ namespace TicketBookingApi.Controllers
     public class TripsController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<TripsController> _logger;
 
-        public TripsController(IMediator mediator) => _mediator = mediator;
+        public TripsController(IMediator mediator, ILogger<TripsController> logger)
+        {
+            _mediator = mediator;
+            _logger = logger;
+        }
 
         [HttpGet]
         public async Task<ActionResult<List<TripDto>>> Get(string? from, string? to, DateTime? date)
-            => await _mediator.Send(new GetTripsQuery(from, to, date));
+        {
+            try
+            {
+                return await _mediator.Send(new GetTripsQuery(from, to, date));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<TripDto>> GetById(int id)
-            => await _mediator.Send(new GetTripQuery(id));
+        {
+            try
+            {
+                return await _mediator.Send(new GetTripQuery(id));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
+            }
+        }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<TripDto>> Create([FromBody] CreateTripCommand command)
         {
-            var tripDto = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetById), new { id = tripDto.Id }, tripDto);
+            try
+            {
+                var tripDto = await _mediator.Send(command);
+                return CreatedAtAction(nameof(GetById), new { id = tripDto.Id }, tripDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
@@ -41,9 +74,16 @@ namespace TicketBookingApi.Controllers
         {
             if (id != command.Id)
                 return BadRequest("Идентификатор в URL не совпадает с идентификатором в теле запроса");
-
-            var tripDto = await _mediator.Send(command);
-            return Ok(tripDto);
+            try
+            {
+                var tripDto = await _mediator.Send(command);
+                return Ok(tripDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
+            }
         }
 
         [HttpDelete("{id}")]
@@ -58,6 +98,11 @@ namespace TicketBookingApi.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
             }
         }
     }

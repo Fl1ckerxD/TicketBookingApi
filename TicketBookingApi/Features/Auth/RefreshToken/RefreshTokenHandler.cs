@@ -12,12 +12,15 @@ namespace TicketBookingApi.Features.Auth.RefreshToken
         private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly IJwtService _jwtService;
+        private readonly ILogger<RefreshTokenHandler> _logger;
 
-        public RefreshTokenHandler(AppDbContext context, UserManager<User> userManager, IJwtService jwtService)
+        public RefreshTokenHandler(AppDbContext context, UserManager<User> userManager,
+            IJwtService jwtService, ILogger<RefreshTokenHandler> logger)
         {
             _context = context;
             _userManager = userManager;
             _jwtService = jwtService;
+            _logger = logger;
         }
 
         public async Task<AuthResponseDto> Handle(RefreshTokenCommand request, CancellationToken ct)
@@ -40,6 +43,8 @@ namespace TicketBookingApi.Features.Auth.RefreshToken
             _context.RefreshTokens.Update(storedToken);
             await _context.RefreshTokens.AddAsync(newRefreshToken, ct);
             await _context.SaveChangesAsync(ct);
+
+            _logger.LogInformation($"Пользователь {user.UserName} обновил свой токен");
 
             return new AuthResponseDto
             {

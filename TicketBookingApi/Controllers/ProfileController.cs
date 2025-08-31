@@ -12,10 +12,12 @@ namespace TicketBookingApi.Controllers
     public class ProfileController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<ProfileController> _logger;
 
-        public ProfileController(IMediator mediator)
+        public ProfileController(IMediator mediator, ILogger<ProfileController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         [HttpPut]
@@ -35,6 +37,7 @@ namespace TicketBookingApi.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
             }
         }

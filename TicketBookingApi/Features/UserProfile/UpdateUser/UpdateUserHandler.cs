@@ -11,12 +11,15 @@ namespace TicketBookingApi.Features.UserProfile.UpdateUser
         private readonly UserManager<User> _userManager;
         private readonly IUserContext _userContext;
         private readonly IMapper _mapper;
+        private readonly ILogger<UpdateUserHandler> _logger;
 
-        public UpdateUserHandler(UserManager<User> userManager, IUserContext userContext, IMapper mapper)
+        public UpdateUserHandler(UserManager<User> userManager, IUserContext userContext,
+            IMapper mapper, ILogger<UpdateUserHandler> logger)
         {
             _userManager = userManager;
             _userContext = userContext;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<UserProfileDto> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
@@ -43,9 +46,14 @@ namespace TicketBookingApi.Features.UserProfile.UpdateUser
 
             var updateResult = await _userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
-                throw new Exception("Не удалось обновить пользователя: " +
-                    string.Join(", ", updateResult.Errors.Select(e => e.Description)));
+            {
+                string msg = "Не удалось обновить пользователя: " +
+                    string.Join(", ", updateResult.Errors.Select(e => e.Description));
+                _logger.LogError(msg);
+                throw new Exception(msg);
+            }
 
+            _logger.LogInformation($"Пользователь {user.UserName}, обновил свой профиль");
             return _mapper.Map<UserProfileDto>(user);
         }
     }

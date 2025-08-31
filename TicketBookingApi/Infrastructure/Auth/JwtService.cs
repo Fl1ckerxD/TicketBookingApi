@@ -11,10 +11,12 @@ namespace TicketBookingApi.Infrastructure.Auth
     public class JwtService : IJwtService
     {
         private readonly IConfiguration _config;
+        private readonly ILogger<JwtService> _logger;
 
-        public JwtService(IConfiguration config)
+        public JwtService(IConfiguration config, ILogger<JwtService> logger)
         {
             _config = config;
+            _logger = logger;
         }
 
         public string GenerateJwtToken(User user, IList<string> roles)
@@ -39,6 +41,7 @@ namespace TicketBookingApi.Infrastructure.Auth
                 signingCredentials: creds
             );
 
+            _logger.LogInformation($"Выдан JWT токен для входа пользователю {user.UserName}");
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 

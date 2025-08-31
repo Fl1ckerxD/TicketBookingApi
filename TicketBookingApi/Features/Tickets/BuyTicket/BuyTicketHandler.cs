@@ -10,11 +10,13 @@ namespace TicketBookingApi.Features.Tickets.BuyTicket
     {
         private readonly AppDbContext _context;
         private readonly IUserContext _userContext;
+        private readonly ILogger<BuyTicketHandler> _logger;
 
-        public BuyTicketHandler(AppDbContext context, IUserContext userContext)
+        public BuyTicketHandler(AppDbContext context, IUserContext userContext, ILogger<BuyTicketHandler> logger)
         {
             _context = context;
             _userContext = userContext;
+            _logger = logger;
         }
 
         public async Task<TicketDto> Handle(BuyTicketCommand request, CancellationToken ct)
