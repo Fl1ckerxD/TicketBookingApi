@@ -1,0 +1,43 @@
+services:
+  ticketbookingapi:
+    build:
+      context: .
+      dockerfile: TicketBookingApi/Dockerfile
+    container_name: ticketbookingapi
+    ports:
+      - "5287:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DockerConnection=Server=db;Database=TicketBooking;User=sa;Password=MyStrong@Passw0rd;TrustServerCertificate=True;
+      - Authentication__Google__ClientId=${GOOGLE_CLIENT_ID}
+      - Authentication__Google__ClientSecret=${GOOGLE_CLIENT_SECRET}
+      - Authentication__Yandex__ClientId=${YANDEX_CLIENT_ID}
+      - Authentication__Yandex__ClientSecret=${YANDEX_CLIENT_SECRET}
+    depends_on:
+      - db
+    networks:
+      - ticketbooking-network
+    restart: unless-stopped
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: ticketbooking-mssql
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=MyStrong@Passw0rd
+    volumes:
+      - sql-data:/var/opt/mssql
+    ports:
+      - "1433:1433"
+    networks:
+      - ticketbooking-network
+    restart: unless-stopped
+
+networks:
+  ticketbooking-network:
+    name: ticketbooking-network
+    driver: bridge
+  
+volumes:
+  sql-data:

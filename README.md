@@ -1,7 +1,9 @@
 # 📌 TicketBookingApi
 
-[![.NET](https://img.shields.io/badge/.NET_9.0-purple?logo=.net)](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
-[![MS_SQL Server](https://img.shields.io/badge/MS_SQL_Server-2022-orange)](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
+[![.NET](https://img.shields.io/badge/.NET_9.0-purple?style=for-the-badge&logo=.net)](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
+[![MS_SQL Server](https://img.shields.io/badge/MS_SQL_Server-2022-orange?style=for-the-badge&)](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
+[![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/get-started)
+[![Docker Compose](https://img.shields.io/badge/Docker%20Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/compose/install/)
 
 RESTful API для системы бронирования билетов на основе ASP.NET Core 9. Предоставляет функционал для управления поездками, бронирования билетов и пользовательскими аккаунтами с поддержкой современных методов аутентификации.
 
@@ -33,28 +35,28 @@ RESTful API для системы бронирования билетов на �
     - Обновление своего профиля
 
 ## 🛠 Технологии  
-| Категория        | Технология                     |
-|------------------|--------------------------------|
-| **Backend**          | ASP.NET Core 9                 |
-| **База данных**      | MS SQL Server                  |
-| **ORM**              | EF Core (Code First) |
-| **Безопасность**     | ASP.NET Identity, JWT (Access Tokens + Refresh Tokens), OAuth 2.0 (Google, Yandex)  |
-| **Паттерны и библиотеки**      | CQRS (MediatR), AutoMapper, FluentValidation|
-| **API Docs**      |  OpenAPI / Swagger, Scalar |
+| Категория                 | Технология                                                                          |
+|---------------------------|-------------------------------------------------------------------------------------|
+| **Backend**               | ASP.NET Core 9                                                                      |
+| **База данных**           | MS SQL Server                                                                       |
+| **ORM**                   | EF Core (Code First)                                                                |
+| **Безопасность**          | ASP.NET Identity, JWT (Access Tokens + Refresh Tokens), OAuth 2.0 (Google, Yandex)  |
+| **Паттерны и библиотеки** | CQRS (MediatR), AutoMapper, FluentValidation                                        |
+| **API Docs**              | OpenAPI / Swagger, Scalar                                                           |
 
 ## ▶️ Запуск проекта
-Предварительные требования
+### 🖥️ Базовый запуск:
+Предварительные требования:
 - .NET 9 SDK
 - MS SQL Server (локальный или облачный)
-- Postman или аналогичный инструмент для тестирования API
 
-### 1. Клонировать репозиторий
+#### 1. Клонировать репозиторий
 ``` bash
 git clone https://github.com/Fl1ckerxD/TicketBookingApi.git
 cd TicketBookingApi
 ```
 
-### 2. Настройте подключение к БД:
+#### 2. Настройте подключение к БД:
 - Откройте файл `appsettings.json`
 - Измените строку подключения:
 ``` json
@@ -63,12 +65,12 @@ cd TicketBookingApi
   }
 ```
 
-### 3. Примените миграции:
+#### 3. Примените миграции:
 ``` bash
 dotnet ef database update
 ```
 
-### 4. Настройте OAuth (опционально):
+#### 4. Настройте OAuth (опционально):
 - Для Google OAuth:
 ``` bash
 dotnet user-secrets set "Authentication:Google:ClientId" "<CLIENT_ID>"
@@ -80,16 +82,50 @@ dotnet user-secrets set "Authentication:Yandex:ClientId" "<CLIENT_ID>"
 dotnet user-secrets set "Authentication:Yandex:ClientSecret" "<CLIENT_SECRET>"
 ```
 
-### 5. Запустить приложение
+#### 5. Запустить приложение
 ``` bash
 dotnet run
 ```
+---
+### 🐋 Развертывание через Docker
+Для удобного запуска приложения в изолированной среде используется Docker. Проект включает в себя `Dockerfile` и `docker-compose.yml` для оркестрации сервисов.
 
+Убедитесь, что на вашем компьютере установлены:
+- [Docker](https://www.docker.com/get-started)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+#### 1. Клонировать репозиторий
+``` bash
+git clone https://github.com/Fl1ckerxD/TicketBookingApi.git
+cd TicketBookingApi
+```
+
+#### 2. Настройте подключение к БД:
+- Откройте файл `Program.cs`
+- Измените строку подключения c `DefaultConnection` на `DockerConnection`:
+``` c#
+const string CONNECTION_STRING = "DockerConnection";
+```
+
+#### 3. Настройте OAuth (опционально):
+- Создате .env файл в корне проекта (рядом с `docker-compose.yml`)
+- Добавьте следующие значения:
+```
+GOOGLE_CLIENT_ID=<CLIENT_ID>
+GOOGLE_CLIENT_SECRET=<CLIENT_SECRET>
+YANDEX_CLIENT_ID=<CLIENT_ID>
+YANDEX_CLIENT_SECRET=<CLIENT_SECRET>
+```
+
+#### 4. Запустите приложение с помощью Docker Compose:
+``` bash
+docker compose up --build
+```
+---
 По умолчанию API будет доступно по адресу:
 👉 http://localhost:5287 или https://localhost:7298
 
 ### 👤 Тестовые пользователи 
-
 При первом запуске в системе создаются два тестовых пользователя: 
 - Администратор: 
     - Логин: log1
@@ -99,7 +135,7 @@ dotnet run
     - Логин: log2
     - Пароль: user123
 
-### 6. Документация API:
+### 📖 Документация API:
 - Swagger UI: http://localhost:5287/swagger
 - Scalar UI: http://localhost:5287/scalar
 

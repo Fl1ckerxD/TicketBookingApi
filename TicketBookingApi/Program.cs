@@ -94,18 +94,30 @@ public class Program
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key)
             };
-        })
-        .AddGoogle(options =>
-        {
-            options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-            options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-        })
-        .AddYandex(options =>
-        {
-            options.ClientId = builder.Configuration["Authentication:Yandex:ClientId"];
-            options.ClientSecret = builder.Configuration["Authentication:Yandex:ClientSecret"];
-            options.CallbackPath = "/yandex-signin";
         });
+
+        var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+        var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+        if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+        {
+            builder.Services.AddAuthentication().AddGoogle(options =>
+            {
+                options.ClientId = googleClientId;
+                options.ClientSecret = googleClientSecret;
+            });
+        }
+
+        var yandexClientId = builder.Configuration["Authentication:Yandex:ClientId"];
+        var yandexClientSecret = builder.Configuration["Authentication:Yandex:ClientSecret"];
+        if (!string.IsNullOrEmpty(yandexClientId) && !string.IsNullOrEmpty(yandexClientSecret))
+        {
+            builder.Services.AddAuthentication().AddYandex(options =>
+            {
+                options.ClientId = yandexClientId;
+                options.ClientSecret = yandexClientSecret;
+                options.CallbackPath = "/yandex-signin";
+            });
+        }
 
 
         builder.Services.AddAuthorization();
@@ -137,7 +149,7 @@ public class Program
             {
                 options.SwaggerEndpoint("/openapi/v1.json", "v1");
             });
-            app.MapScalarApiReference( );
+            app.MapScalarApiReference();
         }
 
         app.UseHttpsRedirection();
