@@ -1,7 +1,6 @@
 # 📌 TicketBookingApi
 
 [![.NET](https://img.shields.io/badge/.NET_9.0-purple?logo=.net)](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
-[![EF Core](https://img.shields.io/badge/EF_Core-9.0-green)](https://learn.microsoft.com/ru-ru/ef/core/get-started/overview/install)
 [![MS_SQL Server](https://img.shields.io/badge/MS_SQL_Server-2022-orange)](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
 
 RESTful API для системы бронирования билетов на основе ASP.NET Core 9. Предоставляет функционал для управления поездками, бронирования билетов и пользовательскими аккаунтами с поддержкой современных методов аутентификации.
@@ -12,7 +11,7 @@ RESTful API для системы бронирования билетов на �
 - Аутентификация и авторизация 
     - Регистрация и вход пользователей
     - Обновление токенов (JWT Access/Refresh Tokens)
-    - OAuth 2.0 (авторизация через Google)
+    - OAuth 2.0 (авторизация через Google, Yandex)
 
 - Управление билетами 
     - Покупка билета
@@ -41,7 +40,7 @@ RESTful API для системы бронирования билетов на �
 | **ORM**              | EF Core (Code First) |
 | **Безопасность**     | ASP.NET Identity, JWT (Access Tokens + Refresh Tokens), OAuth 2.0 (Google, Yandex)  |
 | **Паттерны и библиотеки**      | CQRS (MediatR), AutoMapper, FluentValidation|
-| **API Docs**      | Swagger / OpenAPI |
+| **API Docs**      |  OpenAPI / Swagger, Scalar |
 
 ## ▶️ Запуск проекта
 Предварительные требования
@@ -102,6 +101,7 @@ dotnet run
 
 ### 6. Документация API:
 - Swagger UI: http://localhost:5287/swagger
+- Scalar UI: http://localhost:5287/scalar
 
 ## 🔐 Аутентификация
 ### Получение токенов

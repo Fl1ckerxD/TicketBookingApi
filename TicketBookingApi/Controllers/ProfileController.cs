@@ -21,6 +21,11 @@ namespace TicketBookingApi.Controllers
         }
 
         [HttpPut]
+        [EndpointSummary("Обновление профиля пользователя")]
+        [EndpointDescription("Обновляет информацию профиля текущего пользователя, включая имя, фамилию, email и номер телефона")]
+        [ProducesResponseType(typeof(UserProfileDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<UserProfileDto>> UpdateUser([FromBody] UpdateUserCommand command)
         {
             try

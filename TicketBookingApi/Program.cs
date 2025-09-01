@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
 using TicketBookingApi.Common.Validations;
 using TicketBookingApi.Domain;
 using TicketBookingApi.Domain.Interfaces;
@@ -25,7 +27,26 @@ public class Program
         // Add services to the container.
         builder.Services.AddControllers()
             .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>());
-        builder.Services.AddOpenApi();
+
+        builder.Services.AddOpenApi(options =>
+        {
+            options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+            options.AddDocumentTransformer((document, context, _) =>
+            {
+                document.Info.Description = """
+                RESTful API для системы бронирования билетов на основе ASP.NET Core 9.
+                Предоставляет функционал для управления поездками,
+                бронирования билетов и пользовательскими аккаунтами с поддержкой современных методов аутентификации.
+                """;
+                document.Info.Contact = new OpenApiContact
+                {
+                    Name = "Михайлов Вячеслав",
+                    Email = "mihaylov.slava@outlook.com"
+                };
+
+                return Task.CompletedTask;
+            });
+        });
 
         builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(conString));
         builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
@@ -104,7 +125,7 @@ public class Program
             catch (Exception ex)
             {
                 var logger = services.GetRequiredService<ILogger<Program>>();
-                logger.LogError(ex, "Error migrating database");
+                logger.LogError(ex, "Ошибка миграции базы данных");
             }
         }
 
@@ -112,10 +133,11 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
-            app.UseSwaggerUi(options =>
+            app.UseSwaggerUI(options =>
             {
-                options.DocumentPath = "/openapi/v1.json";
+                options.SwaggerEndpoint("/openapi/v1.json", "v1");
             });
+            app.MapScalarApiReference( );
         }
 
         app.UseHttpsRedirection();

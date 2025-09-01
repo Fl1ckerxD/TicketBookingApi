@@ -24,6 +24,11 @@ namespace TicketBookingApi.Controllers
         }
 
         [HttpPost]
+        [EndpointSummary("Покупка билета")]
+        [EndpointDescription("Позволяет авторизованному пользователю купить билет на указанный рейс и место")]
+        [ProducesResponseType(typeof(TicketDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<TicketDto>> Buy([FromBody] BuyTicketCommand command)
         {
             try
@@ -44,7 +49,11 @@ namespace TicketBookingApi.Controllers
 
         [HttpGet("user/{userName}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<List<TicketDto>>> GetByUserId(string userName)
+        [EndpointSummary("Получение билетов пользователя по имени")]
+        [EndpointDescription("Позволяет администратору получить все билеты, купленные указанным пользователем")]
+        [ProducesResponseType(typeof(List<TicketDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<List<TicketDto>>> GetByUserName(string userName)
         {
             try
             {
@@ -62,6 +71,9 @@ namespace TicketBookingApi.Controllers
         }
 
         [HttpGet("me")]
+        [EndpointSummary("Получение моих билетов")]
+        [EndpointDescription("Позволяет авторизованному пользователю получить все свои купленные билеты")]
+        [ProducesResponseType(typeof(IEnumerable<TicketDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<TicketDto>>> GetMyTickets()
         {
             try
@@ -77,6 +89,10 @@ namespace TicketBookingApi.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [EndpointSummary("Отмена билета")]
+        [EndpointDescription("Позволяет авторизованному пользователю отменить купленный билет по его идентификатору")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Cancel(Guid id)
         {
             try

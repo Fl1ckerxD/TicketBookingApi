@@ -99,7 +99,7 @@ namespace TicketBookingApi.Infrastructure.Auth
 
         public async Task<AuthResponseDto> LoginAsync(string username, string password)
         {
-            if (!string.IsNullOrEmpty(username) || !string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
                 throw new ArgumentNullException("Логин и пароль обязательны для ввода");
 
             var user = await _userManager.FindByNameAsync(username);

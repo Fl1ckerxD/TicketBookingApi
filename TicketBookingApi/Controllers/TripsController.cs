@@ -25,6 +25,9 @@ namespace TicketBookingApi.Controllers
         }
 
         [HttpGet]
+        [EndpointSummary("Получить список поездок с возможностью фильтрации по параметрам")]
+        [EndpointDescription("Возвращает список всех поездок. Можно фильтровать по пункту отправления, пункту назначения и дате")]
+        [ProducesResponseType(typeof(List<TripDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<List<TripDto>>> Get(string? from, string? to, DateTime? date)
         {
             try
@@ -39,11 +42,19 @@ namespace TicketBookingApi.Controllers
         }
 
         [HttpGet("{id}")]
+        [EndpointSummary("Получить детали поездки по идентификатору")]
+        [EndpointDescription("Возвращает детали конкретной поездки по её уникальному идентификатору")]
+        [ProducesResponseType(typeof(TripDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<TripDto>> GetById(int id)
         {
             try
             {
                 return await _mediator.Send(new GetTripQuery(id));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -54,6 +65,9 @@ namespace TicketBookingApi.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
+        [EndpointSummary("Создать новую поездку")]
+        [EndpointDescription("Позволяет администраторам создавать новые поездки, указывая пункт отправления, пункт назначения, время отправления и прибытия, количество мест и цену")]
+        [ProducesResponseType(typeof(TripDto), StatusCodes.Status201Created)]
         public async Task<ActionResult<TripDto>> Create([FromBody] CreateTripCommand command)
         {
             try
@@ -70,6 +84,9 @@ namespace TicketBookingApi.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
+        [EndpointSummary("Обновить информацию о поездке")]
+        [EndpointDescription("Позволяет администраторам обновлять детали существующих поездок, включая пункт отправления, пункт назначения, время отправления и прибытия, количество мест и цену")]
+        [ProducesResponseType(typeof(TripDto), StatusCodes.Status200OK)]
         public async Task<ActionResult<TripDto>> Update(int id, [FromBody] UpdateTripCommand command)
         {
             if (id != command.Id)
@@ -88,6 +105,10 @@ namespace TicketBookingApi.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
+        [EndpointSummary("Удалить поездку")]
+        [EndpointDescription("Позволяет администраторам удалять существующие поездки по их уникальному идентификатору")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(int id)
         {
             try

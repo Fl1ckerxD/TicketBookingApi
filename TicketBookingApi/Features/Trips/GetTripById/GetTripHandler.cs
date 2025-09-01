@@ -17,7 +17,8 @@ namespace TicketBookingApi.Features.Trips.GetTripById
 
         public async Task<TripDto> Handle(GetTripQuery request, CancellationToken ct)
         {
-            var trip = await _context.Trips.FindAsync(request.id, ct);
+            var trip = await _context.Trips.FindAsync(request.id, ct)
+                ?? throw new KeyNotFoundException($"Поездка с идентификатором {request.id} не найдена");
             return _mapper.Map<TripDto>(trip);
         }
     }

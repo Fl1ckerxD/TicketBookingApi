@@ -23,6 +23,9 @@ namespace TicketBookingApi.Controllers
         }
 
         [HttpGet]
+        [EndpointSummary("Получение списка всех пользователей")]
+        [EndpointDescription("Возвращает список всех пользователей системы")]
+        [ProducesResponseType(typeof(List<UserDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<List<UserDto>>> GetUsers()
         {
             try
@@ -37,6 +40,10 @@ namespace TicketBookingApi.Controllers
         }
 
         [HttpGet("{userName}")]
+        [EndpointSummary("Получение пользователя по имени")]
+        [EndpointDescription("Возвращает данные пользователя по его имени")]
+        [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<UserDto>> GetUserByName(string userName)
         {
             try
@@ -55,6 +62,10 @@ namespace TicketBookingApi.Controllers
         }
 
         [HttpDelete("{userName}")]
+        [EndpointSummary("Удаление пользователя по имени")]
+        [EndpointDescription("Удаляет пользователя из системы по его имени")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteUser(string userName)
         {
             try

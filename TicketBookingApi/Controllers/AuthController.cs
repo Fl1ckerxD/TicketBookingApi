@@ -24,6 +24,11 @@ namespace TicketBookingApi.Controllers
         }
 
         [HttpPost("login")]
+        [EndpointSummary("Авторизация пользователя")]
+        [EndpointDescription("Принимает логин и пароль, возвращает Access-токен и Refresh-токен при успешной авторизации")]
+        [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginCommand command)
         {
             try
@@ -31,9 +36,13 @@ namespace TicketBookingApi.Controllers
                 var authResponse = await _mediator.Send(command);
                 return authResponse;
             }
-            catch (UnauthorizedAccessException)
+            catch (ArgumentNullException ex)
             {
-                return Unauthorized();
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {
@@ -43,6 +52,10 @@ namespace TicketBookingApi.Controllers
         }
 
         [HttpPost("register")]
+        [EndpointSummary("Регистрация пользователя")]
+        [EndpointDescription("Создаёт нового пользователя и возвращает статус успешной регистрации")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] RegisterCommand command)
         {
             try
@@ -52,11 +65,11 @@ namespace TicketBookingApi.Controllers
             }
             catch (ArgumentNullException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(ex.Message);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -66,6 +79,10 @@ namespace TicketBookingApi.Controllers
         }
 
         [HttpPost("refresh-token")]
+        [EndpointSummary("Обновление токена")]
+        [EndpointDescription("Принимает refresh-токен и возвращает новую пару access/refresh токенов")]
+        [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<AuthResponseDto>> RefreshToken([FromBody] RefreshTokenCommand command)
         {
             try
@@ -73,9 +90,9 @@ namespace TicketBookingApi.Controllers
                 var authResponse = await _mediator.Send(command);
                 return authResponse;
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized();
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {
@@ -85,6 +102,9 @@ namespace TicketBookingApi.Controllers
         }
 
         [HttpGet("signin/{provider}")]
+        [EndpointSummary("Вход через внешний провайдер")]
+        [EndpointDescription("Перенаправляет пользователя на страницу авторизации выбранного провайдера (Google, Yandex)")]
+        [ProducesResponseType(StatusCodes.Status302Found)]
         public IActionResult SignIn(string provider, string returnUrl = "/")
         {
             var redirectUrl = Url.Action(nameof(Callback), "Auth", new { returnUrl, provider }, Request.Scheme);
@@ -93,6 +113,10 @@ namespace TicketBookingApi.Controllers
         }
 
         [HttpGet("callback")]
+        [EndpointSummary("Обработка внешней авторизации")]
+        [EndpointDescription("Принимает результат аутентификации от внешнего провайдера и возвращает токен")]
+        [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<AuthResponseDto>> Callback(string returnUrl = "/", string provider = "Google")
         {
             try
@@ -107,7 +131,7 @@ namespace TicketBookingApi.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
